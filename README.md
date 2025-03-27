@@ -1,4 +1,5 @@
 # dicom-mcp: A DICOM Model Context Protocol Server
+[![smithery badge](https://smithery.ai/badge/@ChristianHinge/dicom-mcp)](https://smithery.ai/server/@ChristianHinge/dicom-mcp)
 
 This repo is part of a blog post: [Agentic Healthcare LLMs](https://www.christianhinge.com/projects/dicom-mcp/)
 
@@ -104,6 +105,14 @@ dicom-mcp allows AI assistants to query patient information, studies, series, an
     - Returns: Dictionary with extracted text information and status
     
 ## Installation
+
+### Installing via Smithery
+
+To install DICOM Model Context Protocol Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@ChristianHinge/dicom-mcp):
+
+```bash
+npx -y @smithery/cli install @ChristianHinge/dicom-mcp --client claude
+```
 
 ### Prerequisites
 

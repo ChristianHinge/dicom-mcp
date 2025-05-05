@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/christianhinge-dicom-mcp-badge.png)](https://mseep.ai/app/christianhinge-dicom-mcp)
+
 # DICOM MCP Server for Medical Imaging Systems 🏥
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

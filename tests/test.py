@@ -35,7 +35,7 @@ def main():
     
     # Query for patients
     print("\nQuerying patients...")
-    patients = client.query_patient()
+    patients = client.query_patients()
     if not patients:
         print("No patients found")
         return
@@ -46,7 +46,7 @@ def main():
     
     # Query for studies
     print("\nQuerying studies...")
-    studies = client.query_study(patient_id=patient_id)
+    studies = client.query_studies(patient_id=patient_id)
     if not studies:
         print(f"No studies found for patient {patient_id}")
         return

@@ -80,7 +80,7 @@ class DicomClient:
         else:
             return False, f"Failed to associate with DICOM node at {self.host}:{self.port} (Called AE: {self.called_aet}, Calling AE: {self.calling_aet})"
     
-    def find(self, query_dataset: Dataset, query_model) -> List[Dict[str, Any]]:
+    def find(self, query_dataset: Dataset, query_model, attributes:List[str]) -> List[Dict[str, Any]]:
         """Execute a C-FIND request.
         
         Args:
@@ -93,6 +93,10 @@ class DicomClient:
         Raises:
             Exception: If association fails
         """
+        for attr in attributes:
+            if not hasattr(query_dataset, attr):
+                setattr(query_dataset, attr, "")
+
         # Associate with the DICOM node
         assoc = self.ae.associate(self.host, self.port, ae_title=self.called_aet)
         
@@ -108,16 +112,16 @@ class DicomClient:
             for (status, dataset) in responses:
                 if status and status.Status == 0xFF00:  # Pending
                     if dataset:
-                        results.append(self._dataset_to_dict(dataset))
+                        results.append(self._dataset_to_dict(dataset,attributes))
         finally:
             # Always release the association
             assoc.release()
         
         return results
     
-    def query_patient(self, patient_id: str = None, name_pattern: str = None, 
+    def query_patients(self, patient_id: str = None, name_pattern: str = None, 
                      birth_date: str = None, attribute_preset: str = "standard",
-                     additional_attrs: List[str] = None, exclude_attrs: List[str] = None) -> List[Dict[str, Any]]:
+                     additional_attrs: List[str] = []) -> List[Dict[str, Any]]:
         """Query for patients matching criteria.
         
         Args:
@@ -126,7 +130,6 @@ class DicomClient:
             birth_date: Patient birth date (YYYYMMDD)
             attribute_preset: Attribute preset (minimal, standard, extended)
             additional_attrs: Additional attributes to include
-            exclude_attrs: Attributes to exclude
             
         Returns:
             List of matching patient records
@@ -146,31 +149,23 @@ class DicomClient:
             ds.PatientBirthDate = birth_date
         
         # Add attributes based on preset
-        attrs = get_attributes_for_level("patient", attribute_preset, additional_attrs, exclude_attrs)
-        for attr in attrs:
-            if not hasattr(ds, attr):
-                setattr(ds, attr, "")
+        attrs = get_attributes_for_level("patient", attribute_preset, additional_attrs)
         
         # Execute query
-        return self.find(ds, PatientRootQueryRetrieveInformationModelFind)
+        return self.find(ds, PatientRootQueryRetrieveInformationModelFind, attrs)
     
-    def query_study(self, patient_id: str = None, study_date: str = None, 
-                   modality: str = None, study_description: str = None, 
-                   accession_number: str = None, study_instance_uid: str = None,
-                   attribute_preset: str = "standard", additional_attrs: List[str] = None, 
-                   exclude_attrs: List[str] = None) -> List[Dict[str, Any]]:
+    def query_studies(self, patient_id: str = None, study_date: str = None, 
+                   modality: str = None, accession_number: str = None, 
+                   attribute_preset: str = "standard", additional_attrs: List[str] = None) -> List[Dict[str, Any]]:
         """Query for studies matching criteria.
         
         Args:
             patient_id: Patient ID
             study_date: Study date or range (YYYYMMDD or YYYYMMDD-YYYYMMDD)
             modality: Modalities in study
-            study_description: Study description (can include wildcards)
             accession_number: Accession number
-            study_instance_uid: Study Instance UID
             attribute_preset: Attribute preset (minimal, standard, extended)
             additional_attrs: Additional attributes to include
-            exclude_attrs: Attributes to exclude
             
         Returns:
             List of matching study records
@@ -189,39 +184,23 @@ class DicomClient:
         if modality:
             ds.ModalitiesInStudy = modality
             
-        if study_description:
-            ds.StudyDescription = study_description
-            
         if accession_number:
             ds.AccessionNumber = accession_number
-            
-        if study_instance_uid:
-            ds.StudyInstanceUID = study_instance_uid
         
         # Add attributes based on preset
-        attrs = get_attributes_for_level("study", attribute_preset, additional_attrs, exclude_attrs)
-        for attr in attrs:
-            if not hasattr(ds, attr):
-                setattr(ds, attr, "")
+        attrs = get_attributes_for_level("study", attribute_preset, additional_attrs)
         
         # Execute query
-        return self.find(ds, StudyRootQueryRetrieveInformationModelFind)
+        return self.find(ds, StudyRootQueryRetrieveInformationModelFind, attrs)
     
-    def query_series(self, study_instance_uid: str, series_instance_uid: str = None,
-                    modality: str = None, series_number: str = None, 
-                    series_description: str = None, attribute_preset: str = "standard",
-                    additional_attrs: List[str] = None, exclude_attrs: List[str] = None) -> List[Dict[str, Any]]:
+    def query_series(self, study_instance_uid: str, modality: str = None, attribute_preset: str = "standard", additional_attrs: List[str] = None) -> List[Dict[str, Any]]:
         """Query for series matching criteria.
         
         Args:
             study_instance_uid: Study Instance UID (required)
-            series_instance_uid: Series Instance UID
             modality: Modality (e.g. "CT", "MR")
-            series_number: Series number
-            series_description: Series description (can include wildcards)
             attribute_preset: Attribute preset (minimal, standard, extended)
             additional_attrs: Additional attributes to include
-            exclude_attrs: Attributes to exclude
             
         Returns:
             List of matching series records
@@ -231,40 +210,24 @@ class DicomClient:
         ds.QueryRetrieveLevel = "SERIES"
         ds.StudyInstanceUID = study_instance_uid
         
-        # Add query parameters if provided
-        if series_instance_uid:
-            ds.SeriesInstanceUID = series_instance_uid
-            
         if modality:
             ds.Modality = modality
-            
-        if series_number:
-            ds.SeriesNumber = series_number
-            
-        if series_description:
-            ds.SeriesDescription = series_description
-        
+
         # Add attributes based on preset
-        attrs = get_attributes_for_level("series", attribute_preset, additional_attrs, exclude_attrs)
-        for attr in attrs:
-            if not hasattr(ds, attr):
-                setattr(ds, attr, "")
+        attrs = get_attributes_for_level("series", attribute_preset, additional_attrs)
         
         # Execute query
-        return self.find(ds, StudyRootQueryRetrieveInformationModelFind)
+        return self.find(ds, StudyRootQueryRetrieveInformationModelFind, attrs)
     
-    def query_instance(self, series_instance_uid: str, sop_instance_uid: str = None,
-                      instance_number: str = None, attribute_preset: str = "standard",
-                      additional_attrs: List[str] = None, exclude_attrs: List[str] = None) -> List[Dict[str, Any]]:
+    def query_instance(self, series_instance_uid: str,
+                      attribute_preset: str = "standard",
+                      additional_attrs: List[str] = None) -> List[Dict[str, Any]]:
         """Query for instances matching criteria.
         
         Args:
             series_instance_uid: Series Instance UID (required)
-            sop_instance_uid: SOP Instance UID
-            instance_number: Instance number
             attribute_preset: Attribute preset (minimal, standard, extended)
             additional_attrs: Additional attributes to include
-            exclude_attrs: Attributes to exclude
             
         Returns:
             List of matching instance records
@@ -273,22 +236,12 @@ class DicomClient:
         ds = Dataset()
         ds.QueryRetrieveLevel = "IMAGE"
         ds.SeriesInstanceUID = series_instance_uid
-        
-        # Add query parameters if provided
-        if sop_instance_uid:
-            ds.SOPInstanceUID = sop_instance_uid
             
-        if instance_number:
-            ds.InstanceNumber = instance_number
-        
         # Add attributes based on preset
-        attrs = get_attributes_for_level("instance", attribute_preset, additional_attrs, exclude_attrs)
-        for attr in attrs:
-            if not hasattr(ds, attr):
-                setattr(ds, attr, "")
+        attrs = get_attributes_for_level("instance", attribute_preset, additional_attrs)
         
         # Execute query
-        return self.find(ds, StudyRootQueryRetrieveInformationModelFind)
+        return self.find(ds, StudyRootQueryRetrieveInformationModelFind,attrs)
     
     def move_series(
             self, 
@@ -636,7 +589,7 @@ class DicomClient:
         }
     
     @staticmethod
-    def _dataset_to_dict(dataset: Dataset) -> Dict[str, Any]:
+    def _dataset_to_dict(dataset: Dataset,attributes: List[str] = None) -> Dict[str, Any]:
         """Convert a DICOM dataset to a dictionary.
         
         Args:
@@ -652,7 +605,7 @@ class DicomClient:
         for elem in dataset:
             if elem.VR == "SQ":
                 # Handle sequences
-                result[elem.keyword] = [DicomClient._dataset_to_dict(item) for item in elem.value]
+                result[elem.keyword] = [DicomClient._dataset_to_dict(item, attributes) for item in elem.value]
             else:
                 # Handle regular elements
                 if hasattr(elem, "keyword"):
@@ -666,5 +619,7 @@ class DicomClient:
                     except Exception:
                         # Fall back to string representation
                         result[elem.keyword] = str(elem.value)
-        
+
+        result = {k: v for k, v in result.items() if k in attributes}
+
         return result

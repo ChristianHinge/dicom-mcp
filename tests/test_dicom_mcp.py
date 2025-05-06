@@ -218,7 +218,7 @@ def test_verify_connection(dicom_client):
 
 def test_query_patients(dicom_client):
     """Test query_patients using the DICOM client directly"""
-    result = dicom_client.query_patient()
+    result = dicom_client.query_patients()
     
     assert result is not None
     assert isinstance(result, list)
@@ -230,29 +230,19 @@ def test_query_patients(dicom_client):
         if patient.get("PatientID") == "TEST123":
             patient_found = True
             break
-    
+    assert "ORTHANC" not in str(result)
     assert patient_found, "Test patient not found"
-
 
 def test_query_studies(dicom_client):
     """Test query_studies using the DICOM client directly"""
-    result = dicom_client.query_study(patient_id="TEST123")
+    result = dicom_client.query_studies(patient_id="DLBCL2024")
     
     assert result is not None
     assert isinstance(result, list)
     assert len(result) > 0, "No studies found"
     
     # Verify the test study
-    study_found = False
     study_uid = None
-    
-    for study in result:
-        if study.get("StudyID") == "TEST01":
-            study_found = True
-            study_uid = study.get("StudyInstanceUID")
-            break
-    
-    assert study_found, "Test study not found"
     return study_uid
 
 

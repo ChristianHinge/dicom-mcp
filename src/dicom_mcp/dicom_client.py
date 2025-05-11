@@ -26,6 +26,7 @@ from pynetdicom.sop_class import (
 
 from .attributes import get_attributes_for_level
 from .config import DicomConfiguration
+from .dicom_storage import DicomStorage
 
 class DicomClient:
     """DICOM networking client that handles communication with DICOM nodes."""
@@ -62,6 +63,8 @@ class DicomClient:
 
         # Add specific storage context for PDF - instead of adding all storage contexts
         self.ae.add_requested_context(EncapsulatedPDFStorage)
+
+        self.storage = DicomStorage(config, logger)
 
     def verify_connection(self) -> Tuple[bool, str]:
         """Verify connectivity to the DICOM node using C-ECHO.

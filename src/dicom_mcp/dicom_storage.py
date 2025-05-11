@@ -27,7 +27,7 @@ def _get_key_from_dataset(dataset: Dataset, key: str) -> str:
 
 
 class DicomStorage():
-    """Interface for storage of datasets"""
+    """In memory storage of dataset, that """
     def __init__(self, config: DicomConfiguration, logger: Logger) -> None:
         self.logger = logger
         self._internal_storage: PatientDict = {}
@@ -51,3 +51,29 @@ class DicomStorage():
 
         series = study_dict[series_key]
         series.append(dataset_to_store)
+
+    def retrive(
+            self,
+            patient_id=UNORGANIZED_DATASETS_KEY,
+            study_uid=UNORGANIZED_DATASETS_KEY,
+            series_key=UNORGANIZED_DATASETS_KEY,
+        ) -> List[Dataset]:
+
+        if patient_id not in self._internal_storage:
+
+            self.logger.info(f"Did not find any studies for {patient_id}")
+            return []
+
+        study_dict = self._internal_storage[patient_id]
+
+        if study_uid not in study_dict:
+            self.logger.info(f"Didn't find the study for {patient_id}")
+            return []
+
+        series_dict = study_dict[study_uid]
+
+        if series_key not in series_dict:
+            self.logger.info(f"Didn't find the series for {patient_id}")
+            return []
+
+        return series_dict[series_key]

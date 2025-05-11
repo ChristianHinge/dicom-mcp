@@ -1,3 +1,4 @@
+from src.dicom_mcp import server
 """
 DICOM Client.
 
@@ -13,6 +14,7 @@ from typing import Dict, List, Any, Tuple
 from pydicom import dcmread
 from pydicom.dataset import Dataset
 from pynetdicom import AE, evt, build_role
+from pynetdicom.presentation import AllStoragePresentationContexts, VerificationPresentationContexts
 from pynetdicom.sop_class import (
     PatientRootQueryRetrieveInformationModelFind,
     StudyRootQueryRetrieveInformationModelFind,
@@ -65,6 +67,18 @@ class DicomClient:
         self.ae.add_requested_context(EncapsulatedPDFStorage)
 
         self.storage = DicomStorage(config, logger)
+
+        self.calling_ae = AE(ae_title=config.calling_aet)
+        contexts = VerificationPresentationContexts + AllStoragePresentationContexts
+        self.calling_ae.supported_contexts = contexts
+        if config.scp_port is not None:
+            self.server_thread = self.calling_ae.start_server(('0.0.0.0', config.scp_port),block=False)
+        else:
+            self.server_thread = None
+
+    def close_server(self):
+        if self.server_thread is not None:
+            self.server_thread.shutdown()
 
     def verify_connection(self) -> Tuple[bool, str]:
         """Verify connectivity to the DICOM node using C-ECHO.
@@ -478,6 +492,7 @@ class DicomClient:
             assoc.release()
 
         return result
+
     def extract_pdf_text_from_dicom(
             self,
             study_instance_uid: str,

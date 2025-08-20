@@ -1,0 +1,10 @@
+# DICOM nodes configuration
+nodes:
+  main:
+    host: "localhost"
+    port: 4242
+    ae_title: "ORTHANC"
+    description: "Local Orthanc DICOM server"
+
+current_node: "main"
+calling_aet: "MCPSCU" 

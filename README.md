@@ -205,3 +205,8 @@ npx @modelcontextprotocol/inspector uv run dicom-mcp /path/to/your_config.yaml -
 
 * Built using [pynetdicom](https://github.com/pydicom/pynetdicom)
 * Uses [PyPDF2](https://pypi.org/project/PyPDF2/) for PDF text extraction
+
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/christianhinge-dicom-mcp).
+

@@ -91,7 +91,7 @@ Clone the repository and install test dependencies `pip install -e ".[dev]`
 
 ```bash
 cd tests
-docker ocmpose up -d
+docker compose up -d
 cd ..
 pytest # uploads dummy pdf data to ORTHANC server
 ```

@@ -245,7 +245,7 @@ def create_dicom_mcp_server(config_path: str, name: str = "DICOM MCP") -> FastMC
         client = dicom_ctx.client
         
         try:
-            return client.query_patient(
+            return client.query_patients(
                 patient_id=patient_id,
                 name_pattern=name_pattern,
                 birth_date=birth_date,
@@ -313,7 +313,7 @@ def create_dicom_mcp_server(config_path: str, name: str = "DICOM MCP") -> FastMC
         client = dicom_ctx.client
         
         try:
-            return client.query_study(
+            return client.query_studies(
                 patient_id=patient_id,
                 study_date=study_date,
                 modality=modality_in_study,

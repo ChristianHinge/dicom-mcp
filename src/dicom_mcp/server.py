@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import Dict, List, Any, AsyncIterator
 
-from mcp.server.fastmcp import FastMCP, Context
+from fastmcp import FastMCP, Context
 
 from .attributes import ATTRIBUTE_PRESETS
 from .dicom_client import DicomClient

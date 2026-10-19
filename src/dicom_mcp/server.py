@@ -204,8 +204,8 @@ def create_dicom_mcp_server(config_path: str, name: str = "DICOM MCP") -> FastMC
         patient_id: str = "", 
         birth_date: str = "", 
         attribute_preset: str = "standard", 
-        additional_attributes: List[str] = None,
-        exclude_attributes: List[str] = None, 
+        additional_attributes: List[str] | None = None,
+        exclude_attributes: List[str] | None = None, 
         ctx: Context = None
     ) -> List[Dict[str, Any]]:
         """Query patients matching the specified criteria from the DICOM node.
@@ -265,8 +265,8 @@ def create_dicom_mcp_server(config_path: str, name: str = "DICOM MCP") -> FastMC
         accession_number: str = "", 
         study_instance_uid: str = "",
         attribute_preset: str = "standard", 
-        additional_attributes: List[str] = None,
-        exclude_attributes: List[str] = None, 
+        additional_attributes: List[str] | None = None,
+        exclude_attributes: List[str] | None = None, 
         ctx: Context = None
     ) -> List[Dict[str, Any]]:
         """Query studies matching the specified criteria from the DICOM node.
@@ -335,8 +335,8 @@ def create_dicom_mcp_server(config_path: str, name: str = "DICOM MCP") -> FastMC
         series_description: str = "", 
         series_instance_uid: str = "",
         attribute_preset: str = "standard", 
-        additional_attributes: List[str] = None,
-        exclude_attributes: List[str] = None, 
+        additional_attributes: List[str] | None = None,
+        exclude_attributes: List[str] | None = None, 
         ctx: Context = None
     ) -> List[Dict[str, Any]]:
         """Query series within a study from the DICOM node.
@@ -398,8 +398,8 @@ def create_dicom_mcp_server(config_path: str, name: str = "DICOM MCP") -> FastMC
         instance_number: str = "", 
         sop_instance_uid: str = "",
         attribute_preset: str = "standard", 
-        additional_attributes: List[str] = None,
-        exclude_attributes: List[str] = None, 
+        additional_attributes: List[str] | None = None,
+        exclude_attributes: List[str] | None = None, 
         ctx: Context = None 
     ) -> List[Dict[str, Any]]:
         """Query individual DICOM instances (images) within a series.

@@ -131,6 +131,31 @@ For development:
 }
 ```
 
+#### Running over HTTP
+
+By default the server speaks stdio and is launched by the MCP client. To run it as a standalone server instead, use the streamable-HTTP transport:
+
+```bash
+uv run dicom-mcp /path/to/your_config.yaml --transport http --host 127.0.0.1 --port 8000
+```
+
+Clients then connect to `http://127.0.0.1:8000/mcp`; Claude Desktop does so through [`mcp-remote`](https://www.npmjs.com/package/mcp-remote):
+
+```json
+{
+  "mcpServers": {
+    "dicom": {
+      "command": "npx",
+      "args": ["mcp-remote", "http://127.0.0.1:8000/mcp"]
+    }
+  }
+}
+```
+
+The HTTP transport runs stateless, so the server can be restarted while the client keeps running. `--transport sse` (the legacy SSE transport) accepts the same `--host`/`--port` options.
+
+The HTTP and SSE endpoints have **no authentication**. Bound to `127.0.0.1` (the default), they reject requests whose `Host` or `Origin` header names another site, which keeps web pages in your browser from reaching them through DNS rebinding. Binding to any other address exposes the server to every host that can reach it; keep it behind a firewall or an authenticating reverse proxy.
+
 
 ## 🛠️ Tools Overview
 

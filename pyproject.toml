@@ -3,6 +3,8 @@ name = "dicom-mcp"
 version = "0.1.1"
 description = "Add your description here"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dependencies = [
     "fastmcp>=4.0.0,<5.0.0",
@@ -21,3 +23,7 @@ dev = [
 ]
 [project.scripts]
 dicom-mcp = "dicom_mcp.__main__:main"
+
+[build-system]
+requires = ["uv_build>=0.11.25,<0.12"]
+build-backend = "uv_build"

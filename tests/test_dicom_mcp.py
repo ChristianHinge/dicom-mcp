@@ -344,6 +344,28 @@ def test_create_server():
         assert server is not None
 
 
+def test_tool_params_with_null_default_accept_null():
+    """Parameters that advertise a null default must accept null"""
+    import asyncio
+    from dicom_mcp import create_dicom_mcp_server
+
+    # Only builds the server and lists tools; the lifespan never runs
+    server = create_dicom_mcp_server("tests/test_dicom_servers.yaml")
+    tools = asyncio.run(server.list_tools())
+
+    rejected = []
+    for tool in tools:
+        for name, prop in tool.parameters.get("properties", {}).items():
+            if "default" in prop and prop["default"] is None:
+                types = {prop.get("type")} | {
+                    option.get("type") for option in prop.get("anyOf", [])
+                }
+                if "null" not in types:
+                    rejected.append(f"{tool.name}.{name}")
+
+    assert not rejected, f"null default but null not allowed: {rejected}"
+
+
 if __name__ == "__main__":
     # If run directly, execute pytest
     import sys
